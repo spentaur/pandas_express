@@ -94,4 +94,4 @@ def drop_mostly_missing_columns(df, thresh=50):
         percent_missing[percent_missing >= thresh].index.tolist(), axis=1)
 
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
