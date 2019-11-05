@@ -13,7 +13,7 @@ with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
 setuptools.setup(
-    name="pandas_express",
+    name="pandas-express",
     version="0.0.1",
     author="spentaur",
     description="A collection of Data Science helper functions",
