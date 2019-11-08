@@ -5,7 +5,9 @@ verify_ssl = true
 
 [dev-packages]
 twine = "*"
-v = {editable = true,version = "*"}
+v = {version = "*",editable = true}
+autopep8 = "*"
+pep8 = "*"
 
 [packages]
 pandas = "*"
