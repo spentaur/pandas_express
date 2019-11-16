@@ -1,10 +1,11 @@
 import pandas as pd
 import pandas_flavor as pf
+import re
 
 
 @pf.register_dataframe_method
 def split_date(df, intervals='some'):
-    '''
+    """
     all = ['year',
     'month',
     'day',
@@ -34,7 +35,7 @@ def split_date(df, intervals='some'):
     'weekofyear',
     'dayofweek',
     'quarter']
-    '''
+    """
 
     features = ['year',
                 'month',
@@ -89,9 +90,72 @@ def drop_single_value_columns(df):
 
 @pf.register_dataframe_method
 def drop_mostly_missing_columns(df, thresh=50):
-    percent_missing = df.percent_missing()
+    missing = df.percent_missing()
     return df.drop(
-        percent_missing[percent_missing >= thresh].index.tolist(), axis=1)
+        missing[missing >= thresh].index.tolist(), axis=1)
 
 
-__version__ = "0.0.4"
+@pf.register_dataframe_method
+def get_cardinality(df, ascending=False):
+    nunique = df.nunique().sort_values(ascending=ascending)
+    return nunique
+
+
+@pf.register_dataframe_method
+def get_low_cardinality(df, thresh=10, ascending=False):
+    nunique = get_cardinality(df, ascending)
+    return nunique[nunique <= thresh]
+
+
+@pf.register_dataframe_method
+def get_high_cardinality(df, thresh=10, ascending=False):
+    nunique = get_cardinality(df, ascending)
+    return nunique[nunique <= thresh]
+
+
+def rename_columns(df, method, columns=None, inplace=False):
+    if columns:
+        columns_dict = {column: getattr(column, method)() for column in
+                        columns}
+    else:
+        columns_dict = {column: getattr(column, method)() for column in
+                        df.columns}
+
+    if inplace:
+        df.rename(columns=columns_dict, inplace=inplace)
+    else:
+        return df.rename(columns=columns_dict)
+
+
+@pf.register_dataframe_method
+def set_column_name_capitalize(df, columns=None, inplace=False):
+    return rename_columns(df, 'capitalize', columns, inplace)
+
+
+@pf.register_dataframe_method
+def set_column_name_lowercase(df, columns=None, inplace=False):
+    return rename_columns(df, 'lower', columns, inplace)
+
+
+@pf.register_dataframe_method
+def set_column_name_uppercase(df, columns=None, inplace=False):
+    return rename_columns(df, 'upper', columns, inplace)
+
+
+@pf.register_dataframe_method
+def remove_special_chars_from_column_name(df, columns=None, inplace=False):
+    if columns:
+        columns_dict = {column: re.sub('[^A-Za-z0-9]+', '_', column) for
+                        column in columns}
+    else:
+        columns_dict = {column: re.sub('[^A-Za-z0-9]+', '_', column) for
+                        column in
+                        df.columns}
+
+    if inplace:
+        df.rename(columns=columns_dict, inplace=inplace)
+    else:
+        return df.rename(columns=columns_dict)
+
+
+__version__ = "0.0.5"
